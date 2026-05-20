@@ -103,17 +103,24 @@ extension UsageStore {
         }
         let descriptor = self.providerSpecs[.codex]?.descriptor ?? ProviderDescriptorRegistry.descriptor(for: .codex)
         let context = self.makeFetchContext(provider: .codex, override: nil, includeCredits: true)
-        let outcome = await descriptor.fetchOutcome(context: context)
+        let strategies = await descriptor.fetchPlan.pipeline.resolveStrategies(context)
+        var lastAvailableError: Error?
 
-        switch outcome.result {
-        case let .success(result):
-            guard let credits = result.credits else {
-                throw UsageError.noRateLimitsFound
+        for strategy in strategies {
+            guard await strategy.isAvailable(context) else { continue }
+            do {
+                let result = try await strategy.fetch(context)
+                if let credits = result.credits {
+                    return credits
+                }
+                lastAvailableError = UsageError.noRateLimitsFound
+                guard context.sourceMode == .auto else { break }
+            } catch {
+                lastAvailableError = error
+                guard strategy.shouldFallback(on: error, context: context) else { break }
             }
-            return credits
-        case let .failure(error):
-            throw error
         }
+        throw lastAvailableError ?? ProviderFetchError.noAvailableStrategy(.codex)
     }
 
     func waitForCodexSnapshot(minimumUpdatedAt: Date) async -> UsageSnapshot? {
