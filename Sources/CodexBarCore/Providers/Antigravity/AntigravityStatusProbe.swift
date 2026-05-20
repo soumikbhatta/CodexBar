@@ -263,7 +263,6 @@ public enum AntigravityStatusProbeError: LocalizedError, Sendable, Equatable {
 public struct AntigravityStatusProbe: Sendable {
     public var timeout: TimeInterval = 8.0
 
-    private static let processName = "language_server_macos"
     private static let getUserStatusPath = "/exa.language_server_pb.LanguageServerService/GetUserStatus"
     private static let commandModelConfigPath =
         "/exa.language_server_pb.LanguageServerService/GetCommandModelConfigs"
@@ -465,7 +464,7 @@ public struct AntigravityStatusProbe: Sendable {
             let text = String(line)
             guard let match = Self.matchProcessLine(text) else { continue }
             let lower = match.command.lowercased()
-            guard lower.contains(Self.processName) else { continue }
+            guard Self.isLanguageServerCommandLine(lower) else { continue }
             guard Self.isAntigravityCommandLine(lower) else { continue }
             sawAntigravity = true
             guard let token = Self.extractFlag("--csrf_token", from: match.command) else { continue }
@@ -496,6 +495,13 @@ public struct AntigravityStatusProbe: Sendable {
         let parts = trimmed.split(separator: " ", maxSplits: 1, omittingEmptySubsequences: true)
         guard parts.count == 2, let pid = Int(parts[0]) else { return nil }
         return ProcessLineMatch(pid: pid, command: String(parts[1]))
+    }
+
+    static func isLanguageServerCommandLine(_ command: String) -> Bool {
+        let executable = command.split(separator: " ", maxSplits: 1, omittingEmptySubsequences: true).first
+            .map(String.init) ?? command
+        let processName = URL(fileURLWithPath: executable).lastPathComponent.lowercased()
+        return processName == "language_server_macos" || processName == "language_server"
     }
 
     private static func isAntigravityCommandLine(_ command: String) -> Bool {

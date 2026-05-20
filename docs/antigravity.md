@@ -32,7 +32,7 @@ Antigravity supports local IDE probing and Google OAuth-backed remote usage. The
 
 1) **Process detection**
    - Command: `ps -ax -o pid=,command=`.
-   - Match process name: `language_server_macos` plus Antigravity markers:
+   - Match process name: `language_server` or `language_server_macos` plus Antigravity markers:
      - `--app_data_dir antigravity` OR path contains `/antigravity/`.
    - Extract CLI flags:
      - `--csrf_token <token>` (required).

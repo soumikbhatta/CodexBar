@@ -22,6 +22,19 @@ private final class AntigravityAttemptRecorder: @unchecked Sendable {
 
 struct AntigravityStatusProbeTests {
     @Test
+    func `language server detection accepts current and legacy Antigravity binaries`() {
+        #expect(
+            AntigravityStatusProbe.isLanguageServerCommandLine(
+                "/Applications/Antigravity.app/Contents/Resources/bin/language_server --standalone"))
+        #expect(
+            AntigravityStatusProbe.isLanguageServerCommandLine(
+                "/Applications/Antigravity.app/Contents/Resources/bin/language_server_macos --standalone"))
+        #expect(
+            !AntigravityStatusProbe.isLanguageServerCommandLine(
+                "/Applications/Antigravity.app/Contents/MacOS/Antigravity"))
+    }
+
+    @Test
     func `localhost trust policy only accepts local server trust challenges`() {
         #expect(
             LocalhostTrustPolicy.shouldAcceptServerTrust(
