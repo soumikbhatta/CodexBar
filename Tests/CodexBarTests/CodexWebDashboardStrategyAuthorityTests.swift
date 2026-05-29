@@ -57,6 +57,7 @@ struct CodexWebDashboardStrategyAuthorityTests {
 
         #expect(result.usage.primary == nil)
         #expect(result.usage.secondary == nil)
+        #expect(result.usage.updatedAt == dashboard.updatedAt)
         #expect(result.usage.identity?.accountEmail == "owner@example.com")
         #expect(result.usage.identity?.loginMethod == "pro")
         #expect(result.credits?.remaining == 42)

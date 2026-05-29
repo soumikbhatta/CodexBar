@@ -250,12 +250,12 @@ extension CodexWebDashboardStrategy {
         attachedAccountEmail: String?,
         credits: CreditsSnapshot?) -> UsageSnapshot?
     {
-        guard let credits else { return nil }
+        guard credits != nil else { return nil }
         return UsageSnapshot(
             primary: nil,
             secondary: nil,
             tertiary: nil,
-            updatedAt: credits.updatedAt,
+            updatedAt: dashboard.updatedAt,
             identity: ProviderIdentitySnapshot(
                 providerID: .codex,
                 accountEmail: attachedAccountEmail ?? dashboard.signedInEmail,
