@@ -477,6 +477,34 @@ struct CopilotUsageModelsTests {
     }
 
     @Test
+    func `keeps unlimited chat fallback quota without percent remaining`() throws {
+        let response = try Self.decodeFixture(
+            """
+            {
+              "copilot_plan": "individual",
+              "quota_snapshots": {
+                "premium_interactions": {
+                  "entitlement": 200,
+                  "remaining": 191,
+                  "percent_remaining": 95.5,
+                  "quota_id": "premium_interactions"
+                },
+                "chat_messages": {
+                  "entitlement": 0,
+                  "remaining": 0,
+                  "quota_id": "chat_messages",
+                  "unlimited": true
+                }
+              }
+            }
+            """)
+
+        #expect(response.quotaSnapshots.premiumInteractions?.quotaId == "premium_interactions")
+        #expect(response.quotaSnapshots.chat?.quotaId == "chat_messages")
+        #expect(response.quotaSnapshots.chat?.usedPercent == 0)
+    }
+
+    @Test
     func `flags zero entitlement snapshot as placeholder`() {
         let snapshot = CopilotUsageResponse.QuotaSnapshot(
             entitlement: 0,
