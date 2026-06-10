@@ -73,9 +73,9 @@ public struct CopilotUsageResponse: Sendable, Decodable {
         {
             self.entitlement = entitlement
             self.remaining = remaining
-            self.percentRemaining = percentRemaining
+            self.percentRemaining = unlimited ? 100 : percentRemaining
             self.quotaId = quotaId
-            self.hasPercentRemaining = hasPercentRemaining
+            self.hasPercentRemaining = unlimited || hasPercentRemaining
             self.unlimited = unlimited
             self.entitlementWasDecoded = true
             self.remainingWasDecoded = true
@@ -91,11 +91,11 @@ public struct CopilotUsageResponse: Sendable, Decodable {
             self.remainingWasDecoded = decodedRemaining != nil
             let decodedUnlimited = try container.decodeIfPresent(Bool.self, forKey: .unlimited) ?? false
             let decodedPercent = Self.decodeNumberIfPresent(container: container, key: .percentRemaining)
-            if let decodedPercent {
-                self.percentRemaining = decodedPercent
-                self.hasPercentRemaining = true
-            } else if decodedUnlimited {
+            if decodedUnlimited {
                 self.percentRemaining = 100
+                self.hasPercentRemaining = true
+            } else if let decodedPercent {
+                self.percentRemaining = decodedPercent
                 self.hasPercentRemaining = true
             } else if let entitlement = decodedEntitlement,
                       entitlement > 0,

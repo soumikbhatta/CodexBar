@@ -501,7 +501,32 @@ struct CopilotUsageModelsTests {
 
         #expect(response.quotaSnapshots.premiumInteractions?.quotaId == "premium_interactions")
         #expect(response.quotaSnapshots.chat?.quotaId == "chat_messages")
+        #expect(response.quotaSnapshots.chat?.unlimited == true)
         #expect(response.quotaSnapshots.chat?.usedPercent == 0)
+    }
+
+    @Test
+    func `unlimited quota overrides placeholder percent remaining`() throws {
+        let response = try Self.decodeFixture(
+            """
+            {
+              "copilot_plan": "individual",
+              "quota_snapshots": {
+                "chat": {
+                  "entitlement": 0,
+                  "remaining": 0,
+                  "percent_remaining": 0,
+                  "quota_id": "chat",
+                  "unlimited": true
+                }
+              }
+            }
+            """)
+
+        let chat = try #require(response.quotaSnapshots.chat)
+        #expect(chat.percentRemaining == 100)
+        #expect(chat.usedPercent == 0)
+        #expect(!chat.isPlaceholder)
     }
 
     @Test
